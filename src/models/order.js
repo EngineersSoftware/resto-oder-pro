@@ -6,6 +6,11 @@ const orderSchema = new Schema({
         ref: 'User',
         required: true
     },
+    mesa: {
+        type: Number,
+        min: 1,
+        default: 1
+    },
     items: [{
         platoId: {
             type: Schema.Types.ObjectId,

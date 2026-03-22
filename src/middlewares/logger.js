@@ -1,4 +1,4 @@
-export const requesLogger = (req, res, next) => {
+export const requestLogger = (req, res, next) => {
     const date = new Date().toLocaleDateString();
     const { method, url, ip} = req;
     res.on('finish', () => {

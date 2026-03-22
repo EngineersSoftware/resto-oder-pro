@@ -1,21 +1,41 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { requestLogger } from './middlewares/logger.js';
 import authRoutes from './routes/authRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
+import menuRoutes from './routes/menuRoutes.js';
+import inventoryRoutes from './routes/inventoryRoutes.js';
+import statsRoutes from './routes/statsRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = path.dirname(__filename);
 
 const app = express();
 
+// Servir frontend como archivos estáticos
+app.use(express.static(path.join(__dirname, '../frontend')));
+
 // Middlewares
 app.use(express.json());
-app.use(cors());
-app.use(morgan('dev')); // Log rapido para desarrollo
-app.use(requestLogger); // Log de auditoria obligatorio
+app.use(cors({
+    origin: process.env.FRONTEND_URL || '*',
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.use(morgan('dev'));
+app.use(requestLogger);
 
-// Rutas
+// Rutas API
 app.use('/api/auth', authRoutes);
-app.use('/api/routes', orderRoutes);
+app.use('/api/menu', menuRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/order', orderRoutes);
+app.use('/api/stats', statsRoutes);
+app.use('/api/users', userRoutes);
 
 // Manejo Global de Errores
 app.use((err, req, res, next) => {

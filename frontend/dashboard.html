@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GourmetExpress</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+  <link rel="stylesheet" href="css/main.css" />
+  <script src="./js/auth-guard.js"></script>
+</head>
+<body class="dashboard-body">
+  <div class="bg-gradient"></div>
+
+  <!-- Overlay mobile sidebar -->
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+  <div class="app-shell">
+
+    <!-- ═══════════════════════════════
+         SIDEBAR
+    ═══════════════════════════════ -->
+    <aside class="sidebar" id="sidebar">
+
+      <div class="sidebar-header">
+        <div class="sidebar-logo">Gourmet<span>Express</span></div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-title" id="section-principal">Principal</span>
+
+        <button class="nav-item" data-view="dashboard" data-roles="Admin">
+          <i class="ri-home-4-line"></i>
+          <span class="nav-label">Inicio</span>
+        </button>
+
+        <button class="nav-item" data-view="inventory" data-roles="Admin">
+          <i class="ri-archive-2-line"></i>
+          <span class="nav-label">Inventario</span>
+          <span class="nav-badge" id="nav-badge-inventory" style="display:none;"></span>
+        </button>
+
+        <button class="nav-item" data-view="orders" data-roles="Admin,Mesero,Chef">
+          <i class="ri-restaurant-line"></i>
+          <span class="nav-label">Pedidos</span>
+        </button>
+
+        <button class="nav-item" data-view="menu" data-roles="Admin,Mesero">
+          <i class="ri-bill-line"></i>
+          <span class="nav-label">Menú</span>
+        </button>
+
+        <span class="nav-section-title" id="section-sistema">Sistema</span>
+
+        <button class="nav-item" data-view="users" data-roles="Admin">
+          <i class="ri-team-line"></i>
+          <span class="nav-label">Usuarios</span>
+        </button>
+
+        <button class="nav-item" data-view="settings" data-roles="Admin,Mesero,Chef">
+          <i class="ri-settings-3-line"></i>
+          <span class="nav-label">Configuración</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="user-avatar" id="user-avatar">U</div>
+          <div class="user-info-text">
+            <div class="user-name"  id="user-name">Usuario</div>
+            <div class="user-role-badge" id="user-role"></div>
+          </div>
+          <button class="btn-icon" id="btnLogout" title="Cerrar sesión">
+            <i class="ri-logout-box-r-line"></i>
+          </button>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ═══════════════════════════════
+         CONTENT
+    ═══════════════════════════════ -->
+    <main class="content-area">
+
+      <header class="top-nav">
+        <div style="display:flex;align-items:center;gap:var(--s3);">
+          <button class="btn-icon sidebar-toggle" id="sidebar-toggle" title="Menú">
+            <i class="ri-menu-line"></i>
+          </button>
+          <h2 class="nav-title" id="view-title">Dashboard</h2>
+        </div>
+        <div class="nav-actions">
+          <span class="nav-date" id="current-date"></span>
+        </div>
+      </header>
+
+      <div class="main-content" id="main-view">
+        <!-- Inyectado por router.js -->
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════
+       MODAL: Nuevo Ingrediente (Admin)
+  ═══════════════════════════════ -->
+  <div id="modal-ingrediente" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h3 id="modal-title">Nuevo Ingrediente</h3>
+        <button type="button" class="btn-icon modal-close" aria-label="Cerrar modal">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+
+      <form id="form-ingrediente" autocomplete="off">
+        <div class="form-grid">
+
+          <div class="form-group full-width">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" placeholder="ej. Carne de Res" required />
+          </div>
+
+          <div class="form-group">
+            <label for="categoria">Categoría</label>
+            <input type="text" id="categoria" placeholder="Proteína" />
+          </div>
+
+          <div class="form-group">
+            <label for="unidad">Unidad</label>
+            <input type="text" id="unidad" placeholder="kg, litros, unidades" required />
+          </div>
+
+          <div class="form-group">
+            <label for="stock">Stock Inicial</label>
+            <input type="number" id="stock" placeholder="0" required min="0" step="0.01" />
+          </div>
+
+          <div class="form-group">
+            <label for="minStock">Mín. Alerta</label>
+            <input type="number" id="minStock" placeholder="5" required min="0" step="0.01" />
+          </div>
+
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary modal-close">Cancelar</button>
+          <button type="submit" class="btn-primary" id="btn-submit-ingrediente">
+            <i class="ri-save-line"></i>
+            Guardar
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       SOCKET.IO CLIENT
+  ═══════════════════════════════ -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    (function () {
+      const _user = JSON.parse(localStorage.getItem('user') || '{}');
+      window._socket = io();
+      window._socket.on('connect', () => {
+        if (_user.rol) window._socket.emit('join-role', _user.rol);
+      });
+    })();
+  </script>
+
+  <!-- ═══════════════════════════════
+       ROUTER (entry point)
+  ═══════════════════════════════ -->
+  <script type="module" src="js/router.js"></script>
+</body>
+</html>
